@@ -1,2 +1,5 @@
 15/3/16
-created project "Assignment1"
+-created project "Assignment1".
+-used code from timerdelay to test blinking LED - worked.\
+-added function initialise to include all initialisation code. - failed getting local vairable error so reverted 
+-added ADChannelDrv header and source file to attempt to read audio from the mic

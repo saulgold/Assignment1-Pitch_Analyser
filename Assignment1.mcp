@@ -8,7 +8,7 @@ dir_src=
 dir_bin=C:\DsPIC output
 dir_tmp=
 dir_sin=
-dir_inc=
+dir_inc=C:\Users\SAL\Documents\Embedded systems MSc\DSP\Assignment1\h
 dir_lib=C:\Microchip Starter Kits\dsPIC Starter Kit - 1\MPLAB C30\lib
 dir_lkr=
 [CAT_FILTERS]
@@ -27,18 +27,34 @@ subfolder_lkr=
 file_000=.
 file_001=.
 file_002=.
+file_003=.
+file_004=.
+file_005=.
+file_006=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
 file_002=no
+file_003=no
+file_004=no
+file_005=no
+file_006=no
 [OTHER_FILES]
 file_000=no
 file_001=no
 file_002=no
+file_003=no
+file_004=no
+file_005=no
+file_006=no
 [FILE_INFO]
 file_000=src\main.c
 file_001=src\sask.c
-file_002=h\sask.h
+file_002=src\ADCChannelDrv.c
+file_003=src\OCPWMDrv.c
+file_004=h\sask.h
+file_005=h\ADCChannelDrv.h
+file_006=h\OCPWMDrv.h
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=

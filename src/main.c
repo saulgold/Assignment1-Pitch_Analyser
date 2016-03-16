@@ -1,43 +1,63 @@
-/*****f*        examples/Timer/Timer_Delay/main.c
+/*******        Assignment1\src\main.c
   * Usage:
   *       Execute using MPLAB IDE
   * Summary:
-  *         Simple loop to time blinking of LED using __delay32() function
+  *         analyses input signal and finds the peak pitch
   *
   * Inputs:
-  *       none
+  *       Audio
   * Outputs:
-  *       Blinking LED
+  *       LEDs
 
   * Dependencies:
   *      Sask_Init()
   *		__delay32()
   * Notes:
-  *		Demonstrates simple timer using __delay32() function.
-  *		First of a series of examples that includes Timer_Wait and Timer_Interrupt
+  *			
 
   * ToDo:
   *     none
 
   * Originator:
-  *     Chris Bore, BORES Signal processing, chris@bores.com, www.bores.com
+  *     Saul Goldblatt, saulgold@gmail.com
 
   * History:
-  *      Version 1.00     13/03/2013
+  *      Version 1.00     15/06/2016
   *****/
 
 
 #include <p33FJ256GP506.h>
 #include <libpic30.h>
 #include "..\h\sask.h"
+#include "..\h\ADCChannelDrv.h"
+#include "..\h\OCPWMDrv.h"
+#define FRAME_SIZE 				ADC_BUFFER_SIZE
+#define FILTER_LENGTH			16
 
-_FGS(GWRP_OFF & GCP_OFF);
-_FOSCSEL(FNOSC_FRC);
-_FOSC(FCKSM_CSECMD & OSCIOFNC_ON & POSCMD_NONE);
-_FWDT(FWDTEN_OFF);
+	_FGS(GWRP_OFF & GCP_OFF);
+	_FOSCSEL(FNOSC_FRC);
+	_FOSC(FCKSM_CSECMD & OSCIOFNC_ON & POSCMD_NONE);
+	_FWDT(FWDTEN_OFF);
+	
+/*initialise types for ADCChannel functions*/
+int		adcBuffer		[ ADC_CHANNEL_DMA_BUFSIZE ] 	__attribute__((space(dma)));	
+int		ocPWMBuffer		[ OCPWM_DMA_BUFSIZE ]		__attribute__((space(dma)));
+
+ADCChannelHandle adcChannelHandle;
+OCPWMHandle 	ocPWMHandle;
+
+ADCChannelHandle *pADCChannelHandle; 
+OCPWMHandle 	*pOCPWMHandle 		= &ocPWMHandle;
+
+int 	AudioIn	[ FRAME_SIZE ], AudioWorkSpace[ FRAME_SIZE ], AudioOut [ FRAME_SIZE ];
 
 int main(void)
 {
+	ADCChannelInit(pADCChannelHandle,adcBuffer);
+	OCPWMInit		(pOCPWMHandle,ocPWMBuffer);
+	ADCChannelStart	(pADCChannelHandle);
+	OCPWMStart		(pOCPWMHandle);	
+		
 	unsigned short int led_state;
 	static unsigned short int const LED_ON =SASK_LED_ON;
 	static unsigned short int const LED_OFF = SASK_LED_OFF;
@@ -68,8 +88,15 @@ int main(void)
 	 
 	led_state = LED_OFF;
 	SWITCH_S1_TRIS = 1;
+	int i;
 	while(1)
 	{	
+		while(ADCChannelIsBusy(pADCChannelHandle));
+		ADCChannelRead	(pADCChannelHandle,AudioIn,FRAME_SIZE);	
+
+	
+		while(OCPWMIsBusy(pOCPWMHandle));	
+		OCPWMWrite (pOCPWMHandle,AudioIn,FRAME_SIZE);
 		
 		YELLOW_LED=LED_OFF;
 		if( led_state == LED_OFF )
