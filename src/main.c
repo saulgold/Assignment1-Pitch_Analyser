@@ -28,17 +28,33 @@
 
 #include <p33FJ256GP506.h>
 #include <libpic30.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <dsp.h>
+
 #include "..\h\sask.h"
 #include "..\h\ADCChannelDrv.h"
 #include "..\h\OCPWMDrv.h"
+#include "..\h\fft.h"
+//#include "..\h\dsp.h"
+#include "..\h\twiddleFactors.h"
+
 #define FRAME_SIZE 				ADC_BUFFER_SIZE
 #define FILTER_LENGTH			16
-
+ 
 	_FGS(GWRP_OFF & GCP_OFF);
 	_FOSCSEL(FNOSC_FRC);
 	_FOSC(FCKSM_CSECMD & OSCIOFNC_ON & POSCMD_NONE);
 	_FWDT(FWDTEN_OFF);
-	
+/*initialise FFT stuff*/
+fractcomplex compWorkSpace[FRAME_SIZE];
+
+fractcomplex compTwidFactors[FRAME_SIZE/2],compX[FRAME_SIZE];
+
+int i=0;
+/*	TwidFactorInit (LOG2_BLOCK_LENGTH, &twiddleFactors[0], 0); We need to do this only once at start-up */
+/*this is done in the twiddleFactors.h file I think...*/
+
 /*initialise types for ADCChannel functions*/
 int		adcBuffer		[ ADC_CHANNEL_DMA_BUFSIZE ] 	__attribute__((space(dma)));	
 int		ocPWMBuffer		[ OCPWM_DMA_BUFSIZE ]		__attribute__((space(dma)));
@@ -50,9 +66,11 @@ ADCChannelHandle *pADCChannelHandle;
 OCPWMHandle 	*pOCPWMHandle 		= &ocPWMHandle;
 
 int 	AudioIn	[ FRAME_SIZE ], AudioWorkSpace[ FRAME_SIZE ], AudioOut [ FRAME_SIZE ];
-
+int AudioInStore [ FRAME_SIZE];
 int main(void)
 {
+		
+	
 	ADCChannelInit(pADCChannelHandle,adcBuffer);
 	OCPWMInit		(pOCPWMHandle,ocPWMBuffer);
 	ADCChannelStart	(pADCChannelHandle);
@@ -89,14 +107,44 @@ int main(void)
 	led_state = LED_OFF;
 	SWITCH_S1_TRIS = 1;
 	int i;
-	while(1)
-	{	
-		while(ADCChannelIsBusy(pADCChannelHandle));
-		ADCChannelRead	(pADCChannelHandle,AudioIn,FRAME_SIZE);	
+	
+	FILE * f;
 
 	
+	while(1)
+	{	
+		//	f= fopen( "output.csv","w+");
+		//printf("hello world");	
+		while(ADCChannelIsBusy(pADCChannelHandle));
+		ADCChannelRead	(pADCChannelHandle,AudioIn,FRAME_SIZE);	
+		
+		
+	//copy fractional audio signal into real part of complex fractional data type
+	for(i=0;i<FRAME_SIZE;i++)
+	{
+		compWorkSpace[i].real = AudioIn[i];
+		compWorkSpace[i].imag = 0;
+	}	
+	
+	//generate the first half of the set of twiddle factors required by the DFT
+	TwidFactorInit (7,compTwidFactors,0);
+
+	//generate the DFT of the audio signal
+	FFTComplex(7,compX,compWorkSpace,compTwidFactors,0xFF00);
+
+//	TwidFactorInit (LOG2_BLOCK_LENGTH, &twiddleFactors[0], 0);	/* We need to do this only once at start-up  - done in twiddleFactor.h I think...*/
+
+
+	
+//	for(i=0;i<FRAME_SIZE;i++){	
+//		
+//	fprintf(f,"%d",AudioIn[i]);	
+//		
+//}
+//	fclose(f);
 		while(OCPWMIsBusy(pOCPWMHandle));	
 		OCPWMWrite (pOCPWMHandle,AudioIn,FRAME_SIZE);
+	
 		
 		YELLOW_LED=LED_OFF;
 		if( led_state == LED_OFF )

@@ -3,3 +3,11 @@
 -used code from timerdelay to test blinking LED - worked.\
 -added function initialise to include all initialisation code. - failed getting local vairable error so reverted 
 -added ADChannelDrv header and source file to attempt to read audio from the mic
+-added PWMChannelDrv head and source files
+-added releent code to read and write audi oto the mic and speaker respectively - works
+-tried reading the AudioIn variable to see what form the input was, but wouldn't work. after some fiddleing it did work.
+	but all values were 0. Reasons for this were to do with ping pong ing between the buffers or something.
+16/3/16
+-today I will try and implement FFT on the audio in.
+-copy pasted FFT code and set AudioIn to signcmp.real, builds and runs fine.
+-now trying to output FFT to csv using fopen, needed to increase heap size, so increased it to 1000 bytes arbitrarily.
