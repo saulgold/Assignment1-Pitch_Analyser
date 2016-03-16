@@ -37,7 +37,7 @@
 #include "..\h\OCPWMDrv.h"
 #include "..\h\fft.h"
 //#include "..\h\dsp.h"
-#include "..\h\twiddleFactors.h"
+//#include <twiddleFactors.h>
 
 #define FRAME_SIZE 				ADC_BUFFER_SIZE
 #define FILTER_LENGTH			16
